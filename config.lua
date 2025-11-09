@@ -25,7 +25,7 @@ Config.Daily_Mission = {
             ["lockpick"] = 1, 
         }, 
         reward_money = { -- BONUS MONEY
-            ["bank"] = 5000,
+            ["bank"] = 50000,
         }
     },
     
@@ -45,11 +45,10 @@ Config.Hourly_Mission = {
             ["lockpick"] = 2, 
         },
         reward_money = {
-            -- ["cash"] = 5000,
+            ["cash"] = 5000,
             -- ["bank"] = 5000,
         }
     },
- 
 }
 
 
@@ -67,7 +66,7 @@ Config.Hidden_Mission = {
         name = "Black Item",
         label = "Thu thập usb chứa mã độc",
          required = {
-            ["trojan_usb"] = 10,
+            ["cryptostick"] = 10,
         },
         reward_item = {
             ["lockpick"] = 2, 

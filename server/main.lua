@@ -1,6 +1,6 @@
-local QBCore = exports['qb-core']:GetCoreObject()
+local QBCore = exports['qbx_core']:GetCoreObject()
 
-QBCore.Functions.CreateCallback('mst-mission:server:CheckMission', function(source, cb, type)
+QBCore.Functions.CreateCallback('QByanski-Mission:server:CheckMission', function(source, cb, type)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
     local DailyMission = Player.PlayerData.metadata["dailymission"] or false 
@@ -33,34 +33,38 @@ end)
 
 
 
-RegisterNetEvent("mst-mission:server:TakeDailyMission", function(mission)
+RegisterNetEvent("QByanski-Mission:server:TakeDailyMission", function(mission)
     local src = source 
     local Player = QBCore.Functions.GetPlayer(src)
     local time_table = os.date ("*t")
     if tonumber(Player.PlayerData.metadata["dailymission_timestamp"]) ~= tonumber(time_table.day) then 
-        TriggerClientEvent('QBCore:Notify', src, "You have received the hourly quest called "..Config.Daily_Mission[mission].name.." This mission requires you "..Config.Daily_Mission[mission].label.."", "success") 
+        lib.notify(src, { description = "You have received the hourly quest called"..Config.Daily_Mission[mission].name.."This mission requires you "..Config.Daily_Mission[mission].label.., type = "success"})
+        --TriggerClientEvent('QBCore:Notify', src, "You have received the hourly quest called "..Config.Daily_Mission[mission].name.." This mission requires you "..Config.Daily_Mission[mission].label.."", "success") 
         Player.Functions.SetMetaData("dailymission_timestamp", time_table.day)
         Player.Functions.SetMetaData("dailymission", mission)
     else 
-        TriggerClientEvent('QBCore:Notify', src, "You have already received the day's quest, please wait for a new day", "error") 
+        --TriggerClientEvent('QBCore:Notify', src, "You have already received the day's quest, please wait for a new day", "error") 
+        lib.notify(src, { description = "You have already received the day's quest, pleast wait for a new day", type = "error"})
     end
 end)
 
-RegisterNetEvent("mst-mission:server:TakeHourlyMission", function(mission)
+RegisterNetEvent("QByanski-Mission:server:TakeHourlyMission", function(mission)
     local src = source 
     local Player = QBCore.Functions.GetPlayer(src)
     local time_table = os.date ("*t")
     
     if Player.PlayerData.metadata["hourlymission_timestamp"] ~= time_table.hour then
-        TriggerClientEvent('QBCore:Notify', src, "You have received the hourly quest called "..Config.Hourly_Mission[mission].name.." This mission requires you "..Config.Hourly_Mission[mission].label.."", "success") 
+        --TriggerClientEvent('QBCore:Notify', src, "You have received the hourly quest called "..Config.Hourly_Mission[mission].name.." This mission requires you "..Config.Hourly_Mission[mission].label.."", "success") 
+        lib.notify(src, { description = "You have received the hourly quest called"..Config.Hourly_Mission[mission].name.."This mission requires you"..COnfig.Hourly_Mission[mission].label.., type = "success"})
         Player.Functions.SetMetaData("hourlymission_timestamp", time_table.hour)
         Player.Functions.SetMetaData("hourlymission", mission)
     else 
-        TriggerClientEvent('QBCore:Notify', src, "You have accepted the quest now, please wait a little longer", "error") 
+        --TriggerClientEvent('QBCore:Notify', src, "You have accepted the quest now, please wait a little longer", "error")
+        lib.notify(src, { description = "You have accepted the quest now, please wait a little longer", type = "error"}) 
     end
 end)
 
-RegisterNetEvent("mst-mission:server:TakeHiddenMission", function(mission)
+RegisterNetEvent("QByanski-Mission:server:TakeHiddenMission", function(mission)
     local src = source 
     local Player = QBCore.Functions.GetPlayer(src)
     if not Player.PlayerData.metadata[mission] then 
@@ -71,7 +75,7 @@ RegisterNetEvent("mst-mission:server:TakeHiddenMission", function(mission)
 end)
 
 
-RegisterNetEvent("mst-mission:server:CheckProgress", function(type, requiredTable, RewardItems, RewardMoney)
+RegisterNetEvent("QByanski-Mission:server:CheckProgress", function(type, requiredTable, RewardItems, RewardMoney)
     local src = source 
     local Player = QBCore.Functions.GetPlayer(src)
     local text = ""
@@ -84,8 +88,9 @@ RegisterNetEvent("mst-mission:server:CheckProgress", function(type, requiredTabl
         completeMission(src, type, RewardItems, RewardMoney)
     else 
         for k, v in pairs (requiredTable) do
-            if Player.Functions.GetItemByName(k) then
-                progress[k] = Player.Functions.GetItemByName(k).amount 
+            --if Player.Functions.GetItemByName(k) then
+               -- progress[k] = Player.Functions.GetItemByName(k).amount 
+            local item = exports.ox_inventory:Search(src, 'count', k)
             else 
                 progress[k] = 0
             end
@@ -114,7 +119,8 @@ RegisterNetEvent("mst-mission:server:CheckProgress", function(type, requiredTabl
         end 
 
 
-        TriggerClientEvent('QBCore:Notify', source, "You have now collected:<br>"..text.."<br>Reward:<br>"..reward_item_text..""..reward_money_text, "error")
+        --TriggerClientEvent('QBCore:Notify', source, "You have now collected:<br>"..text.."<br>Reward:<br>"..reward_item_text..""..reward_money_text, "error")
+        lib.notify(src, { description = "You have now collected:<br>"..text.."<br>Reward:<br>"..reward_item_text..""..reward_money_text, type = "error"})
     end
 end)
 
@@ -122,16 +128,18 @@ end)
 function hasMissionItems(source, CostItems)
 	local Player = QBCore.Functions.GetPlayer(source)
 	for k, v in pairs(CostItems) do
-		if Player.Functions.GetItemByName(k) ~= nil then
-			if Player.Functions.GetItemByName(k).amount < (v) then
-				return false
-			end
-		else
-			return false
+		--if Player.Functions.GetItemByName(k) ~= nil then
+			--if Player.Functions.GetItemByName(k).amount < (v) then
+				--return false
+			--end
+        local item = exports.ox_inventory:Search(src, 'count', k)
+        if count < v then
+            return false    
 		end
 	end
-	for k, v in pairs(CostItems) do  
-		Player.Functions.RemoveItem(k, v)
+	for k, v in pairs(CostItems) do
+        exports.ox_inventory:RemoveItem(source, k , v)  
+		--Player.Functions.RemoveItem(k, v)
 		--TriggerClientEvent('inventory:client:ItemBox', source, QBCore.Shared.Items[k], "remove")
 	end
 	return true
@@ -152,8 +160,9 @@ function completeMission(source, type, RewardItems, RewardMoney)
 
 	if RewardItems ~= nil then
 		for k, v in pairs(RewardItems) do
-			Player.Functions.AddItem(k, v)
+			--Player.Functions.AddItem(k, v)
 			--TriggerClientEvent('inventory:client:ItemBox', src, QBCore.Shared.Items[k], "add")
+            local item = exports.ox_inventory:AddItem(source, k, v)
 		end
 	end 
 	
@@ -163,8 +172,8 @@ function completeMission(source, type, RewardItems, RewardMoney)
         end
 	end
 	
-	TriggerClientEvent('QBCore:Notify', source, "Congratulations on completing the quest and getting the reward.", "success")
-	
+	--TriggerClientEvent('QBCore:Notify', source, "Congratulations on completing the quest and getting the reward.", "success")
+	lib.notify(src, { description = "Congratulations on completing the quest and getting the reward.", type = "success"})
 end
 
 
@@ -178,13 +187,16 @@ QBCore.Commands.Add("resetmission", "Reset player's date/time quest", {{name = "
             Player.Functions.SetMetaData("hourlymission", 0)
             Player.Functions.SetMetaData("dailymission_timestamp", 0)
             Player.Functions.SetMetaData("hourlymission_timestamp", 0)
-            TriggerClientEvent('QBCore:Notify', src, "Has reset the mission of "..Player.PlayerData.source, "success")
+            --TriggerClientEvent('QBCore:Notify', src, "Has reset the mission of "..Player.PlayerData.source, "success")
+            lib.notify(src, { description = "Has reset the mission of "..Player.PlayerData.source, type = "success"})
 		else
-			TriggerClientEvent('QBCore:Notify', src, "Players not online", "error")
+			--TriggerClientEvent('QBCore:Notify', src, "Players not online", "error")
+            lib.notify(src, { description = "Players not online", type = "error"})
 		end
 	else
         local Player = QBCore.Functions.GetPlayer(src)
-		TriggerClientEvent('QBCore:Notify', src, "Reset your own quest", "success")
+		--TriggerClientEvent('QBCore:Notify', src, "Reset your own quest", "success")
+        lib.notify(src, { description = "Reset your own quest", type = "success"})
         Player.Functions.SetMetaData("dailymission", 0)
         Player.Functions.SetMetaData("hourlymission", 0)
         Player.Functions.SetMetaData("dailymission_timestamp", 0)

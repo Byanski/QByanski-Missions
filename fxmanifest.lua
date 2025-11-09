@@ -1,8 +1,11 @@
 fx_version 'cerulean'
 game 'gta5'
 author 'Monster Dev Team'
-description 'MST-MISSION | Script Free | Date and time quest system | https://discord.gg/monsterscript'
+description 'QByanski-Mission for QBOX forked from MST-MISSION'
 version '1.0.0'
+
+dependency 'ox_lib'
+dependency 'ox_target'
 
 
 
