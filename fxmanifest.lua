@@ -4,26 +4,30 @@ author 'Monster Dev Team'
 description 'QByanski-Mission for QBOX forked from MST-MISSION'
 version '1.0.0'
 
+lua54 'yes'
+
+-- Dependencies
 dependency 'ox_lib'
 dependency 'ox_target'
 
+-- Shared script (IMPORTANT: Load ox_lib first)
+shared_script '@ox_lib/init.lua'
 
-
-client_script {
+-- Client scripts
+client_scripts {
     'config.lua',
     'client/main.lua',
     'client/menu.lua',
     'client/npc.lua',
 }
 
-
-server_script {
+-- Server scripts
+server_scripts {
+    '@mysql-async/lib/MySQL.lua',
     'config.lua',
     'server/main.lua'
 }
 
-
-lua54 'yes'
-
-client_script "@status/acloader.lua"server_scripts { '@mysql-async/lib/MySQL.lua' }
+-- Status check (if you use this anticheat)
+client_script '@status/acloader.lua'
  
