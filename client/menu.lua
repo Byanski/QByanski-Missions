@@ -1,85 +1,92 @@
+-- Daily Mission Menu
 RegisterNetEvent("QByanski-Mission:client:DailyMissionMenu", function()
-    lib.registerMenu({
+    lib.registerContext({
         id = 'daily_mission_menu',
         title = 'Daily Missions',
-        position = 'top-right',
         options = {
             {
-                label = 'Get Daily Quests',
+                title = 'Get Daily Quest',
                 description = 'Daily quests will reset when a new day passes',
-                args = { action = 'take' }
+                icon = 'clipboard-list',
+                onSelect = function()
+                    TriggerEvent('QByanski-Mission:client:TakeDailyMission')
+                end
             },
             {
-                label = 'Check Progress',
+                title = 'Check Progress',
                 description = "Check your current quest progress",
-                args = { action = 'check' }
+                icon = 'chart-line',
+                onSelect = function()
+                    TriggerEvent('QByanski-Mission:client:CheckProgress', 'dailymission')
+                end
             },
-            {
-                label = 'Exit',
-                description = "Close Menu",
-                args = { action = 'exit' }
-            }
         }
-    }, function(selected, scrollIndex, args)
-        if args.action == 'take' then
-            TriggerEvent('QByanski-Missions:client:TakeDailyMission')
-        elseif args.action == 'check' then
-            TriggerEvent('QByanski-Missions:client:CheckProgress', 'dailymission')
-        elseif args.action == 'exit' then
-            lib.hideMenu()
-        end
-    end)
-
-    lib.showMenu('daily_mission_menu')
+    })
+    lib.showContext('daily_mission_menu')
 end)
 
+-- Hourly Mission Menu
 RegisterNetEvent("QByanski-Mission:client:HourlyMissionMenu", function()
-    lib.registerMenu({
+    lib.registerContext({
         id = 'hourly_mission_menu',
         title = 'Hourly Missions',
-        position = 'top-right',
         options = {
             {
-                label = 'Get Hourly Quests',
+                title = 'Get Hourly Quest',
                 description = 'Get a new quest every hour',
-                args = { event = 'QByanski-Mission:client:TakeHourlyMission' }
+                icon = 'clock',
+                onSelect = function()
+                    TriggerEvent('QByanski-Mission:client:TakeHourlyMission')
+                end
             },
             {
-                label = 'Check Hourly Quest Progress',
+                title = 'Check Hourly Quest Progress',
                 description = 'Check the progress of your hourly quest',
-                args = { event = 'Qbyanski-Missions:client:CheckProgress', mission = 'hourlymission' }
+                icon = 'chart-line',
+                onSelect = function()
+                    TriggerEvent('QByanski-Mission:client:CheckProgress', 'hourlymission')
+                end
             }
         }
-    }, function(selected, scrollIndex, args)
-        TriggerEvent(args.event, args.mission)
-    end)   
-    lib.ShowMenu('hourly_mission_menu')
+    })
+    lib.showContext('hourly_mission_menu')
 end)
 
+-- Hidden Mission Menu
 RegisterNetEvent("QByanski-Mission:client:HiddenMissionMenu", function(data)
-    if GetClockHours() >= Config.Hidden_Mission[data.key].min_time and GetClockHours() <= Config.Hidden_Mission[data.key].max_time then
-        lib.registerMenu({
+    local missionData = Config.Hidden_Mission[data.key]
+    if not missionData then return end
+    
+    local currentHour = GetClockHours()
+    
+    if currentHour >= missionData.min_time and currentHour <= missionData.max_time then
+        lib.registerContext({
             id = 'hidden_mission_menu',
             title = 'Hidden Quests',
-            position = 'top-right',
             options = {
                 {
-                    label = 'Take Quest',
-                    description = 'Take the hidden quest',
-                    args = { event = 'QByanski-Mission:client:TakeHiddenMission', key = data.key }
+                    title = 'Take Quest',
+                    description = 'Take the hidden quest: ' .. missionData.name,
+                    icon = 'eye',
+                    onSelect = function()
+                        TriggerEvent('QByanski-Mission:client:TakeHiddenMission', data.key)
+                    end
                 },
                 {
-                    label = 'Check Current Progress',
+                    title = 'Check Current Progress',
                     description = 'Check progress of hidden quest',
-                    args = { event = 'QByanski-Mission:client:CheckHiddenProgress', key = data.key }
+                    icon = 'chart-line',
+                    onSelect = function()
+                        TriggerEvent('QByanski-Mission:client:CheckHiddenProgress', data.key)
+                    end
                 }
             }
-        }, function(selected, scrollIndex, args)
-            TriggerEvent(args.event, args.key)
-        end)
-        
-        lib.showMenu('hidden_mission_menu')
+        })
+        lib.showContext('hidden_mission_menu')
     else
-        lib.notify({ description = "I'm busy right now, come back later", type = 'error' })
+        lib.notify({ 
+            description = "I'm busy right now, come back between " .. missionData.min_time .. ":00 and " .. missionData.max_time .. ":00", 
+            type = 'error' 
+        })
     end
-end)    
+end)
